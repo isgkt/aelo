@@ -33,13 +33,13 @@ body:
       description: |
         Please fill in the versions and specs below. Refer to the guide linked above if you don't know how to fetch these.
       value: |
-        - rustc: 
-        - cargo: 
-        - aelo: 
-        - OS (Linux / ReactOS): 
-        - libc: 
-        - Architecture (x86-64 / Morello): 
-        - CPU (Model, flags, etc.): 
+        - rustc:
+        - cargo:
+        - aelo:
+        - OS (Linux / ReactOS):
+        - libc:
+        - Architecture (x86-64 / Morello):
+        - CPU (Model, flags, etc.):
     validations:
       required: true
 
