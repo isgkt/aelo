@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -12,16 +17,26 @@ permissions:
 
 jobs:
   build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
       - name: Build Documentation
         run: |
           cargo doc --no-deps --document-private-items
           echo '<meta http-equiv="refresh" content="0; url=aelo/index.html">' > target/doc/index.html
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: 'target/doc/'
+          retention-days: 1
       - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v4
