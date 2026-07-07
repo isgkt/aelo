@@ -5,7 +5,32 @@ artifacts
 coverage
 
 
-
 # -----| Git |-----
 .log
 .diff
+
+
+# -----| Elf |-----
+*.so
+*.a
+*.o
+*.elf
+*.out
+
+
+# -----| Pe |-----
+*.exe
+*.dll
+*.obj
+*.lib
+
+
+# -----| Raw |-----
+*.bin
+
+
+# -----| Proprietary |-----
+*.mekk
+*.htkl
+*.pci
+*.pki
