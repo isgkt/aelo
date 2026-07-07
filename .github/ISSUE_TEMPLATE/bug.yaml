@@ -1,0 +1,56 @@
+name: Bug Report
+
+description: Report unexpected or broken behavior in the compiler
+
+labels: ["bug", "status: triage"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Before submitting an issue
+        Please make sure you have read our [Issue Contribution Guide](https://github.com/harpylang/aelo/tree/main/documentation/guides/issues.md). It contains detailed instructions on how to extract all the required CPU and system information below.
+
+  - type: image_uploader
+    id: visual-evidence
+    attributes:
+      label: Visual Evidence
+      description: Drag and drop or paste any images that help show the issue immediately.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Provide a clear and concise description of what the bug is.
+    validations:
+      required: true
+
+  - type: textarea
+    id: compiler-output
+    attributes:
+      label: Compiler Output or Error Reports
+      description: Paste any panic stack traces, unexpected compiler errors, or generation logs here.
+      render: text
+
+  - type: textarea
+    id: environment-info
+    attributes:
+      label: Environment & System Information
+      description: |
+        Please fill in the versions and specs below. Refer to the guide linked above if you don't know how to fetch these.
+      value: |
+        - rustc: 
+        - cargo: 
+        - aelo: 
+        - OS (Linux / ReactOS): 
+        - libc: 
+        - Architecture (x86-64 / Morello): 
+        - CPU (Model, flags, etc.): 
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Code Snippet or Reproduction Steps
+      description: Provide a minimal code example or the precise command sequence to trigger the behavior.
