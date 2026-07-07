@@ -1,0 +1,52 @@
+name: Feature Request
+
+description: Suggest a new feature, optimization, or subsystem component
+
+labels: ["feature", "status: triage"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Before suggesting a feature
+        Please check the existing [Feature Requests](https://github.com/harpylang/aelo/issues?q=label%3Afeature) to make sure your idea hasn't been proposed yet.
+
+  - type: textarea
+    id: proposal-summary
+    attributes:
+      label: Proposal Summary
+      description: Provide a clear and concise explanation of the feature or improvement you are suggesting.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: affected-components
+    attributes:
+      label: Affected Components / Scope
+      description: Select where this functionality is intended to reside. Select all that apply.
+      multiple: true
+      options:
+        - "Language Syntax. Keyword, Literal, Constant, Builtin, etc"
+        - "Optimization Technique"
+        - "Mekk Modification"
+        - "Backend / New Opcode"
+        - "New CPU Support / Architecture"
+        - "New Kernel Support"
+        - "Tooling / CLI"
+        - "Other"
+    validations:
+      required: true
+
+  - type: textarea
+    id: implementation-ideas
+    attributes:
+      label: Implementation Details
+      description: Do you have an idea of how this can be implemented? Description, structural design, or pseudocode are all welcome.
+      placeholder: "Briefly outline the design, impacted files, or architectural approach..."
+
+  - type: textarea
+    id: poc
+    attributes:
+      label: Proof of Concept / Examples
+      description: Provide example code snippets or use cases showing how this feature would look or behave in practice.
+      render: rust
