@@ -5,6 +5,12 @@ artifacts
 coverage
 
 
+# -----| Python3 |-----
+__venv__/
+__pycache__/
+.mypy_cache/
+
+
 # -----| Git |-----
 .log
 .diff
