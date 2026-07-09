@@ -135,3 +135,30 @@ class Issue(object):
             lines.append("")
 
         return "\n".join(lines)
+
+    def save_local(self, filepath: str) -> None:
+        """
+        Serializes and commits the issue manifest directly to a local file
+        path.
+
+        This acts as a fallback mechanism allowing users to export drafts
+        offline.
+
+        # Side Effects
+
+        - Performs disk I/O operations by opening and writing text encoded in UTF-8.
+        - Emits a diagnostic status report to `stdout`.
+
+        # Errors
+
+        - **ValueError:** Propagated from `_generate_markdown` if strict layout validation rules are violated.
+        """
+        body_content: str = self._generate_markdown()
+        content: str = (
+            f"Title: {self.title}\nLabels: {', '.join(self.labels)}\n\n{body_content}"
+        )
+
+        with open(filepath, "w", encoding="utf-8") as file_path:
+            file_path.write(content)
+
+        print(f"Issue draft saved at: {filepath}")
