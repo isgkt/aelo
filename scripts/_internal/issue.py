@@ -15,6 +15,9 @@
 # See the LICENSE.txt file for more information.
 import typing
 import enum
+import tempfile
+import subprocess
+import os
 
 _BUG_REPORT_LABELS: typing.List[str] = ["bug", "status: triage"]
 _FEATURE_REQUEST_LABELS: typing.List[str] = ["feature", "status: triage"]
@@ -162,3 +165,65 @@ class Issue(object):
             file_path.write(content)
 
         print(f"Issue draft saved at: {filepath}")
+
+    def send_to_github(self) -> bool:
+        """
+        Dispatches the compiled issue package to the remote GitHub instance.
+
+        The operation generates a transient Markdown document on the local file
+        system and invokes the GitHub Command Line Interface binary to handle
+        authorization and remote transmission.
+
+        # External Dependencies & Subprocesses
+
+        - Requires the `gh` binary executable to be present in the host system's `PATH`.
+        - Relies on an authenticated active session within the `gh` tool scope.
+
+        # Process Lifecycles & Error Handling
+
+        - **Validation Failures:** If `_generate_markdown` fails, execution halts immediately and returns `False`.
+        - **Subprocess Failures:** If `gh` terminates with a non-zero exit status, the script intercepts the `CalledProcessError`, routes `stderr` diagnostics to `stdout`, and recovers gracefully returning `False`.
+        - **Environment Discrepancies:** If the `gh` command cannot be located, a `FileNotFoundError` is caught internally and handled.
+        - **Resource Cleanup:** A `finally` structural block guarantees that any generated temporary files are violently unlinked from disk, preventing artifact leaks.
+        """
+        try:
+            body_content: str = self._generate_markdown()
+        except ValueError as error:
+            print(f"Validation Error: {error}")
+            return False
+
+        with tempfile.NamedTemporaryFile(
+            mode="w+", delete=False, suffix=".md", encoding="utf-8"
+        ) as temporary:
+            temporary.write(body_content)
+            temporary_path: str = temporary.name
+
+        try:
+            command: typing.List[str] = [
+                "gh",
+                "issue",
+                "create",
+                "--title",
+                self.title,
+                "--body-file",
+                temporary_path,
+            ]
+
+            for label in self.labels:
+                command.extend(["--label", label])
+
+            result: subprocess.CompletedProcess[str] = subprocess.run(
+                command, capture_output=True, text=True, check=True
+            )
+            print(result.stdout.strip())
+
+            return True
+        except subprocess.CalledProcessError as error:
+            print(f"Stderr: {error.stderr}")
+            return False
+        except FileNotFoundError:
+            print("The GitHub CLI is not available.")
+            return False
+        finally:
+            if os.path.exists(temporary_path):
+                os.remove(temporary_path)
