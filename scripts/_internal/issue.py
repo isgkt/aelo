@@ -99,3 +99,39 @@ class Issue(object):
             )
 
         self.fields[field_identifier] = value.strip()
+
+    def _generate_markdown(self) -> str:
+        """
+        Compiles the localized fields into a standardized GitHub Markdown body.
+
+        The compiler iterates through the expected form layout sequentially to
+        guarantee the visual hierarchy remains unchanged when rendered
+        upstream.
+
+        # Post-Processing & Fallbacks
+
+        - **Optional Fields:** If an optional field is missing or evaluated as empty, the string `_No response_` is explicitly injected as the default placeholder.
+
+        # Errors
+
+        - **ValueError:** Raised if any field designated as mandatory has not been set or contains an empty string.
+        """
+        lines: typing.List[str] = []
+
+        for field_identifier, (label, is_required) in self._expected_fields.items():
+            value: str = self.fields.get(field_identifier, "").strip()
+
+            if is_required and not value:
+                raise ValueError(
+                    f"The required field '{field_identifier}' ({label}) has not been filled in."
+                )
+
+            if not value:
+                value = "_No response_"
+
+            lines.append(f"### {label}")
+            lines.append("")
+            lines.append(value)
+            lines.append("")
+
+        return "\n".join(lines)
