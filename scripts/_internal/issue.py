@@ -14,6 +14,7 @@
 #
 # See the LICENSE.txt file for more information.
 import typing
+import enum
 
 _BUG_REPORT_LABELS: typing.List[str] = ["bug", "status: triage"]
 _FEATURE_REQUEST_LABELS: typing.List[str] = ["feature", "status: triage"]
@@ -29,3 +30,15 @@ _FEATURE_FIELDS: typing.Dict[str, typing.Tuple[str, bool]] = {
     "implementation-ideas": ("Implementation Details", False),
     "poc": ("Proof of Concept / Examples", False),
 }
+
+
+class IssueType(str, enum.Enum):
+    """
+    Specifies the classification category for GitHub repository issues.
+
+    This enumeration guarantees strict alignment between the compiler's
+    internal diagnostic pipelines and the predefined GitHub Issue Forms.
+    """
+
+    FeatureRequest = "Feature Request"
+    BugReport = "Bug Report"
