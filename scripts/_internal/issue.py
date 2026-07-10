@@ -203,6 +203,8 @@ class Issue(object):
                 "gh",
                 "issue",
                 "create",
+                "--repo",
+                "harpylang/aelo",
                 "--title",
                 self.title,
                 "--body-file",
