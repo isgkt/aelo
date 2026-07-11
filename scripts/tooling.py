@@ -51,3 +51,28 @@ _SKIP_WORDS_REGISTRY: typing.Dict[str, int] = {
     "strace": 3,
 }
 _GNU_TOOLS: typing.Set[str] = {"objdump", "readelf", "nm"}
+
+
+class ToolChecker(object):
+    """
+    Provides validation services for host system binary executables and their
+    respective structural versions.
+    """
+
+    def __init__(self, tool: str) -> None:
+        """
+        Initializes the context container for a targeted environment tool.
+
+        # Errors
+
+        - **KeyError:** Raised if the requested `tool` is missing from the global `TOOL_TABLE`.
+        """
+        if tool not in TOOL_TABLE:
+            print(
+                f"[Error] The tool '{tool}' is not recognized or tracked by this repository."
+            )
+            raise KeyError
+
+        self.tool: str = tool
+        self.expected_version: str = TOOL_TABLE[tool]
+        self.executable: str = "python3" if tool == "python" else tool
