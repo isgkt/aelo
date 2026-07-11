@@ -16,6 +16,8 @@
 import typing
 import subprocess
 import shutil
+import argparse
+import sys
 
 TOOL_TABLE: typing.Dict[str, str] = {
     "python": "3.13.5",
@@ -143,3 +145,91 @@ class ToolChecker(object):
             f"[FAIL] {self.tool} - Expected: {self.expected_version}, Found: {found_version}"
         )
         return False
+
+
+def _parse_argument() -> argparse.Namespace:
+    """
+    Parses structural execution commands from standard system input vectors.
+    """
+    base_parser = argparse.ArgumentParser(description="Harpy Tooling Checker Pipeline")
+
+    base_parser.add_argument(
+        "--search",
+        type=str,
+        help="Checks whether a specific tool is available and matches target version schemas.",
+    )
+    base_parser.add_argument(
+        "--all",
+        action="store_true",
+        help="Verify all registered environment toolkit manifests.",
+    )
+    base_parser.add_argument(
+        "--list",
+        action="store_true",
+        help="List target specifications for registered tools.",
+    )
+    base_parser.add_argument(
+        "--version",
+        type=str,
+        dest="get_version",
+        help="Display the expected target version for a specific mapping.",
+    )
+
+    return base_parser.parse_args()
+
+
+def main() -> None:
+    """
+    Execution gateway controlling flow dispatching based on parsed command line contexts.
+    """
+    arguments: argparse.Namespace = _parse_argument()
+
+    if arguments.list:
+        print("Registered baseline configurations:")
+
+        for tool, version in TOOL_TABLE.items():
+            print(f" - {tool}: {version}")
+
+        return
+
+    if arguments.get_version:
+        if arguments.get_version in TOOL_TABLE:
+            print(f"{arguments.get_version}: {TOOL_TABLE[arguments.get_version]}")
+        else:
+            sys.exit(1)
+
+        return
+
+    if arguments.search:
+        try:
+            checker: ToolChecker = ToolChecker(arguments.search)
+            success: bool = checker.verify()
+
+            if not success:
+                sys.exit(1)
+        except KeyError:
+            sys.exit(1)
+
+        return
+
+    if arguments.all or len(sys.argv) == 1:
+        global_success: bool = True
+
+        for tool in TOOL_TABLE:
+            try:
+                if not ToolChecker(tool).verify():
+                    global_success = False
+            except KeyError:
+                continue
+
+        if not global_success:
+            sys.exit(1)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        sys.exit(130)
+    except Exception:
+        sys.exit(1)
