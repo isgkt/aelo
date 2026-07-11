@@ -15,6 +15,7 @@
 # See the LICENSE.txt file for more information.
 import typing
 import subprocess
+import shutil
 
 TOOL_TABLE: typing.Dict[str, str] = {
     "python": "3.13.5",
@@ -96,3 +97,49 @@ class ToolChecker(object):
             return output.splitlines()[0] if output else ""
         except (subprocess.CalledProcessError, FileNotFoundError):
             return ""
+
+    def verify(self) -> bool:
+        """
+        Evaluates the availability and structural constraints of the active tool.
+        """
+        if not shutil.which(self.executable):
+            print(f"[ERROR] {self.tool} target binary missing from PATH.")
+            return False
+
+        if self.expected_version == "?":
+            print(f"[OK] {self.tool} located (version skipped).")
+            return True
+
+        first_line: str = self._get_first_line()
+
+        if not first_line:
+            print(f"[ERROR] Failed to extract version descriptor for {self.tool}.")
+            return False
+
+        parts: typing.List[str] = first_line.split()
+        found_version: str
+
+        if self.tool in _GNU_TOOLS:
+            found_version = parts[-1]
+        elif self.tool in _SKIP_WORDS_REGISTRY:
+            skip: int = _SKIP_WORDS_REGISTRY[self.tool]
+
+            if len(parts) <= skip:
+                print(
+                    f"[ERROR] Unexpected layout constraint for {self.tool}: '{first_line}'"
+                )
+                return False
+
+            found_version = parts[skip].lstrip("v")
+        else:
+            print(f"[ERROR] No parsing dispatch strategy defined for {self.tool}.")
+            return False
+
+        if found_version == self.expected_version:
+            print(f"[OK] {self.tool} {found_version}")
+            return True
+
+        print(
+            f"[FAIL] {self.tool} - Expected: {self.expected_version}, Found: {found_version}"
+        )
+        return False
