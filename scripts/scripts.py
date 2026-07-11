@@ -17,6 +17,9 @@ import importlib.util
 import os
 import typing
 import types
+import sys
+import argparse
+
 from scripts._internal.types import FlagManifest, DiscoveryRegistry, ScriptMetadata
 
 
@@ -120,3 +123,62 @@ class DiscoveryPresenter(object):
                 f"{flag} {meta_argument}" if meta_argument else flag
             )
             print(f"  {parameter_signature.ljust(25)} : {description}")
+
+
+def _parse_input_arguments() -> argparse.Namespace:
+    """
+    Extracts explicit execution commands from the standard runtime vector.
+    """
+    parser = argparse.ArgumentParser(description="Harpy Script Discovery Utility")
+
+    parser.add_argument(
+        "--list",
+        action="store_true",
+        help="List all scripts registered in the deployment pipeline.",
+    )
+    parser.add_argument(
+        "--explain",
+        type=str,
+        help="Provide detailed operational descriptions and flag interfaces for a script.",
+    )
+
+    return parser.parse_args()
+
+
+def main() -> None:
+    """
+    Execution gateway controlling flow routing based on parsed system queries.
+    """
+    arguments: argparse.Namespace = _parse_input_arguments()
+    scripts_dir: str = os.path.dirname(os.path.abspath(__file__))
+
+    discoverer = ScriptDiscoverer(scripts_dir)
+    registry: DiscoveryRegistry = discoverer.resolve_available_scripts()
+
+    if arguments.list:
+        DiscoveryPresenter.display_list(registry)
+        return
+
+    if arguments.explain:
+        target_name: str = arguments.explain
+
+        if not target_name.endswith(".py"):
+            target_name = f"{target_name}.py"
+
+        if target_name in registry:
+            DiscoveryPresenter.display_explanation(target_name, registry[target_name])
+        else:
+            print(f"[Error] Script '{arguments.explain}' could not be resolved.")
+            sys.exit(1)
+        return
+
+    DiscoveryPresenter.display_list(registry)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        sys.exit(130)
+    except Exception:
+        sys.exit(1)
