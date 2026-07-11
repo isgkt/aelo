@@ -28,6 +28,16 @@ from tests.python._internal.issue.test_issue_generate_markdown import (
 )
 from tests.python._internal.issue.test_issue_save_local import TestIssueSaveLocal
 from tests.python._internal.issue.test_issue_send_to_github import TestIssueSendToGithub
+from tests.python.tooling.test_tool_checker_initialization import (
+    TestToolCheckerInitialization,
+)
+from tests.python.tooling.test_tool_checker_get_first_line import (
+    TestToolCheckerGetFirstLine,
+)
+from tests.python.tooling.test_tool_checker_verify import TestToolCheckerVerify
+from tests.python.tooling.test_tool_checker_main_pipeline import (
+    TestToolCheckerMainPipeline,
+)
 
 if __name__ == "__main__":
     unittest.main()
