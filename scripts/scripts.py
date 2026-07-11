@@ -17,7 +17,7 @@ import importlib.util
 import os
 import typing
 import types
-from scripts._internal.types import FlagManifest, DiscoveryRegistry
+from scripts._internal.types import FlagManifest, DiscoveryRegistry, ScriptMetadata
 
 
 class ScriptDiscoverer(object):
@@ -85,3 +85,38 @@ class ScriptDiscoverer(object):
             registry[filename] = {"who_am_i": who_am_i, "flags": flags}
 
         return registry
+
+
+class DiscoveryPresenter(object):
+    """
+    Formatters and displays systemic diagnostic schemas into readable standard output targets.
+    """
+
+    @staticmethod
+    def display_list(registry: DiscoveryRegistry) -> None:
+        """
+        Renders an index of tracked repository helper utilities.
+        """
+        print("Registered executable scripts available:")
+        for filename, metadata in sorted(registry.items()):
+            print(f" - {filename}: {metadata['who_am_i']}")
+
+    @staticmethod
+    def display_explanation(filename: str, metadata: ScriptMetadata) -> None:
+        """
+        Outputs detailed usage profiles, design goals, and execution parameter constraints.
+        """
+        print(f"Script: {filename}")
+        print(f"Description: {metadata['who_am_i']}\n")
+        print("Available Flags / Options:")
+
+        if not metadata["flags"]:
+            print("  No internal configurations or parameter flags registered.")
+            return
+
+        for flag, design_data in sorted(metadata["flags"].items()):
+            meta_argument, description = design_data
+            parameter_signature: str = (
+                f"{flag} {meta_argument}" if meta_argument else flag
+            )
+            print(f"  {parameter_signature.ljust(25)} : {description}")
