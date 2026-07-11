@@ -14,6 +14,7 @@
 #
 # See the LICENSE.txt file for more information.
 import typing
+import subprocess
 
 TOOL_TABLE: typing.Dict[str, str] = {
     "python": "3.13.5",
@@ -76,3 +77,22 @@ class ToolChecker(object):
         self.tool: str = tool
         self.expected_version: str = TOOL_TABLE[tool]
         self.executable: str = "python3" if tool == "python" else tool
+
+    def _get_first_line(self) -> str:
+        """
+        Executes the underlying binary requesting its version signature.
+        """
+        try:
+            result: subprocess.CompletedProcess[str] = subprocess.run(
+                [self.executable, "--version"],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            output: str = (
+                result.stdout.strip() if result.stdout else result.stderr.strip()
+            )
+
+            return output.splitlines()[0] if output else ""
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            return ""
