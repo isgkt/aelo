@@ -17,6 +17,7 @@ import importlib.util
 import os
 import typing
 import types
+from scripts._internal.types import FlagManifest, DiscoveryRegistry
 
 
 class ScriptDiscoverer(object):
@@ -50,3 +51,37 @@ class ScriptDiscoverer(object):
             return module
         except Exception:
             return None
+
+    def resolve_available_scripts(self) -> DiscoveryRegistry:
+        """
+        Scans the registered tracking directory to reflect automation signatures.
+        """
+        registry: DiscoveryRegistry = {}
+
+        if not os.path.isdir(self.directory):
+            return registry
+
+        for filename in os.listdir(self.directory):
+            if (
+                not filename.endswith(self.target_suffix)
+                or filename in self.ignored_files
+            ):
+                continue
+
+            script_name: str = filename[: -len(self.target_suffix)]
+            file_path: str = os.path.join(self.directory, filename)
+            module: typing.Optional[types.ModuleType] = self._load_module_from_path(
+                script_name, file_path
+            )
+
+            if module is None:
+                continue
+
+            token_prefix: str = f"SCRIPT_{script_name.upper()}"
+            who_am_i: str = getattr(
+                module, f"{token_prefix}_WHO_AM_I", "No operational summary defined."
+            )
+            flags: FlagManifest = getattr(module, f"{token_prefix}_FLAGS", {})
+            registry[filename] = {"who_am_i": who_am_i, "flags": flags}
+
+        return registry
